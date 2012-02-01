@@ -1,0 +1,29 @@
+This tool counts the number of odd numbers between 0 and 1 billion, and it
+does so in several ways:
+
+1 single threaded count
+2 naive dual threaded count
+3 atomic dual threaded count
+4 smart dual threaded count (using counters that are completely separate)
+5 shared dual threaded count (using counters that might share a cache line)
+
+Compile with:
+
+CXXFLAGS=-O0 make
+CXXFLAGS=-O1 make
+CXXFLAGS=-O2 make
+CXXFLAGS=-O3 make
+
+And on various platforms, and observe the differences.
+
+Case '2' can deliver wildly varying numbers since it does non-atomic
+operations. Some gcc's basically ignore one of the threads when compiling
+with -O.
+
+You will find that case '5' shows the effects of cacheline sharing even
+without atomic operations, except when optimizing: modern GCCs know about
+this problem and localize the variable.
+
+Also fun, try:
+$ sudo numactl --physcpubind=0,1 ./main
+
